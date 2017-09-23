@@ -1,12 +1,13 @@
-import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import json
 from collections import defaultdict, Counter
+from pandas import DataFrame, Series
+import numpy as np
 
 
 path = "/Users/naresh/workspace/pydata-book/ch02/usagov_bitly_data2012-03-16-1331923249.txt"
-file = open(path, "r")
+# file = open(path, "r")
 records = [json.loads(line) for line in open(path)]
 print records[0]
 print records[0]['t']
@@ -54,6 +55,29 @@ counter = Counter(time_zones)
 print counter.most_common(10)
 
 # achieving same with pandas
-from pandas import DataFrame, Series
 frame = DataFrame(records)
-print frame.head(10)
+
+tz_counts = frame['tz'].value_counts()
+print tz_counts[:10]
+
+# filling the missing data
+clean_tz = frame['tz'].fillna('Missing')
+clean_tz[clean_tz == ''] = 'Unkown'
+tz_counts = clean_tz.value_counts()
+
+print type(tz_counts[:10])
+# plt.interactive(False)
+
+tz_counts[:10].plot(kind="barh", rot=1)
+# plt.show()
+# list columns of data frame
+print frame.columns.values
+print frame.a
+results = Series([x.split()[0] for x in frame.a.dropna()])
+print results[:5]
+
+# filter not null on column a
+cframe = frame[frame.a.notnull()]
+operating_system = Series(np.where(cframe.a.str.contains("Windows"), "Windows", "Not Windows"))
+
+
