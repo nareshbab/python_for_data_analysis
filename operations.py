@@ -6,7 +6,7 @@ from pandas import DataFrame, Series
 import numpy as np
 
 
-path = "/Users/naresh/workspace/pydata-book/ch02/usagov_bitly_data2012-03-16-1331923249.txt"
+path = "pydata-book/ch02/usagov_bitly_data2012-03-16-1331923249.txt"
 # file = open(path, "r")
 records = [json.loads(line) for line in open(path)]
 print records[0]
@@ -78,6 +78,14 @@ print results[:5]
 
 # filter not null on column a
 cframe = frame[frame.a.notnull()]
+print cframe.columns.values
 operating_system = Series(np.where(cframe.a.str.contains("Windows"), "Windows", "Not Windows"))
-
-
+by_tz_os = cframe.groupby(['tz', operating_system])
+agg_counts = by_tz_os.size().unstack().fillna(0)
+indexer = agg_counts.sum(1).argsort()
+count_subset = agg_counts.take(indexer)[-10:]
+count_subset.plot(kind="barh", stacked=True)
+# plt.show()
+normed_subset = count_subset.div(count_subset.sum(1), axis=0)
+normed_subset.plot(kind="barh", stacked=True)
+plt.show()
